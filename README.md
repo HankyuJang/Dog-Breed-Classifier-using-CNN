@@ -1,5 +1,8 @@
 # [Deep Learning] Dog Breed Classification
 
+- Hardware: GPU([cuDNN](https://developer.nvidia.com/cudnn)) - AWS EC2 Deep Learning AMI with Source Code (CUDA 8, Ubuntu)
+- Software: Keras, Tensorflow, OpenCV, Numpy, Matplotlib, Python
+
 In this project, I first implemented a dog breed classifier from scratch using Convolutional Neural Networks. The summary of the CNN model is shown below. It attained over __19%__ accuracy in classifying dogs into 133 categories. The accuracy is not promising, but compared to the random classifier (less than 1% accuracy), the model is working in some level.
 
 Then, I utilized pre-trained CNN models to get better working models. I fixed the weights of the networks upto the final layer. Then I added Global Average Pooling layer to reduce the total parameters, and then added the dense layer to have 133 output nodes (corresponding to the number of dog breeds). I only trained the last two layers for 20 epochs with batch size of 20. As the result, `VGG16` model produced the test accuracy of around __49%__ and `Resnet50` model produced the test accuracy of around __79%__ which was a dramatic increased compared to my previous model.
@@ -31,7 +34,21 @@ I used OpenCV's implementation of [Haar feature-based cascade classifiers](http:
 
 ![face_detect_image](images/face_detect.PNG)
 
-## CNN from Scratch
+## Step 2: Detect Dogs
+
+I used a pre-trained `ResNet-50` model to detect dogs. The model is trained on ImageNet which links over 10 million URLs to one of the 1000 categories. Amongst the 1000 categories, dogs appear in dictionary keys 151 (Chihuahua) to 268 (Mexican hairless). Using this information, I first classify an image using the `ResNet-50` model and checked if the predicted label is in the range 151 - 268.
+
+### Pre processing
+
+1. Convert images to 4D array `(number of samples, rows, cols, channels)`
+Keras CNNs require a 4D array when using TensorFlow as backend
+2. Resize images to 224 X 224.
+
+## Step 3: CNN from Scratch
+
+### Pre processing
+
+1. Rescale the images by dividing each pixel by 255.
 
 From my understanding of Convolutional layers, each layer seems to detect different aspects in images. For instance, first convolutional layer detects edges or blobs of colors, the second layer detects circles, stripes and rectangles which are general features used to analyze any image in any data set. The third and fourth convolutional layer detects some specific features in the image that could distinguish which object is in the image. Finally, the fifth convolutional layer may be able to pick out highest order ideas that could be used to detect the breed of the specific dog.
 
@@ -70,9 +87,9 @@ Non-trainable params: 0
 _________________________________________________________________
 ```
 
-## Transfer Learning
+## Step 4: Transfer Learning
 
-As explained in the beginning, I only trained the weights on the last two layers that are global average pooling layer and the dense layer.
+As explained in the beginning, I only trained the weights on the last two layers that are global average pooling layer and the dense layer. To make this simple, I used bottleneck features for each model. Here, bottleneck features represent the output values of the input image after going through the trained CNN and stopped before the dense layer. 
 
 `VGG16` model: __49%__ accuracy
 ```
